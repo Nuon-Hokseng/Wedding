@@ -8,8 +8,15 @@ import PhotoGallery from "@/components/PhotoGallery";
 import OurStory from "@/components/OurStory";
 import RSVP from "@/components/RSVP";
 import WishesFeed from "@/components/WishesFeed";
+import { supabase } from "@/lib/supabase";
 
-export default function Home() {
+export default function Home({
+  guestName = "លោក នួន​ ហុកសេង​ នឹង​ ភរិយា",
+  guestId,
+}: {
+  guestName?: string;
+  guestId?: number;
+} = {}) {
   const [wishes, setWishes] = useState<
     Array<{
       id: string;
@@ -20,7 +27,6 @@ export default function Home() {
       timestamp: number;
     }>
   >([]);
-  const [guestName, setGuestName] = useState("Guest");
   const [overlayFading, setOverlayFading] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [hideOverlay, setHideOverlay] = useState(false);
@@ -28,6 +34,57 @@ export default function Home() {
   const autoScrollStop = useRef(false);
   const autoScrollCleanup = useRef<(() => void) | null>(null);
   const lockedScrollY = useRef(0);
+
+  // Load wishes from database on mount
+  useEffect(() => {
+    const loadWishes = async () => {
+      const { data, error } = await supabase
+        .from("wishes_feed")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (data && !error) {
+        const formattedWishes = data.map((wish) => ({
+          id: wish.id.toString(),
+          name: wish.name,
+          message: wish.message,
+          guests: wish.number_of_guests,
+          attending: wish.will_attend,
+          timestamp: new Date(wish.created_at).getTime(),
+        }));
+        setWishes(formattedWishes);
+      }
+    };
+
+    loadWishes();
+
+    // Subscribe to new wishes
+    const channel = supabase
+      .channel("wishes_changes")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "wishes_feed" },
+        (payload) => {
+          const newWish = payload.new as any;
+          setWishes((prev) => [
+            {
+              id: newWish.id.toString(),
+              name: newWish.name,
+              message: newWish.message,
+              guests: newWish.number_of_guests,
+              attending: newWish.will_attend,
+              timestamp: new Date(newWish.created_at).getTime(),
+            },
+            ...prev,
+          ]);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const lockScroll = () => {
     if (typeof document === "undefined") return;
@@ -177,11 +234,11 @@ export default function Home() {
         className={`w-full relative z-10 transition-opacity duration-700 ${showContent ? "opacity-100 animate-in" : "opacity-0 pointer-events-none"}`}
       >
         <Header coupleNames="P&M" />
-        <Hero />
+        <Hero guestName={guestName} />
         <WeddingDetails />
         <PhotoGallery />
         <OurStory />
-        <RSVP onWishSubmit={addWish} guestName={guestName} />
+        <RSVP onWishSubmit={addWish} guestName={guestName} guestId={guestId} />
         <WishesFeed wishes={wishes} />
       </main>
     </>

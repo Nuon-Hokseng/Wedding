@@ -3,6 +3,7 @@
 import React from "react";
 import { useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { supabase } from "@/lib/supabase";
 
 interface RSVPFormData {
   name: string;
@@ -14,6 +15,7 @@ interface RSVPFormData {
 export default function RSVP({
   onWishSubmit,
   guestName,
+  guestId,
 }: {
   onWishSubmit: (wish: {
     name: string;
@@ -22,6 +24,7 @@ export default function RSVP({
     attending: boolean;
   }) => void;
   guestName: string;
+  guestId?: number;
 }) {
   const { ref: sectionRef, isVisible: sectionVisible } = useScrollAnimation({
     threshold: 0.1,
@@ -37,29 +40,62 @@ export default function RSVP({
     wishes: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.wishes.trim()) {
+    if (!formData.wishes.trim()) {
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      // If guestId is provided, save to database
+      if (guestId) {
+        const { error } = await supabase.from("wishes_feed").insert([
+          {
+            guest_id: guestId,
+            name: formData.name || guestName,
+            number_of_guests: formData.guests,
+            will_attend: formData.attending,
+            message: formData.wishes,
+          },
+        ]);
+
+        if (error) {
+          console.error("Error saving wish:", error);
+          alert("Failed to save your wish. Please try again.");
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      // Also call the parent callback for local state
       onWishSubmit({
         name: formData.name || "Anonymous Guest",
         message: formData.wishes,
         guests: formData.guests,
         attending: formData.attending,
       });
-    }
 
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({
-        name: "",
-        guests: 1,
-        attending: true,
-        wishes: "",
-      });
-    }, 3000);
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({
+          name: "",
+          guests: 1,
+          attending: true,
+          wishes: "",
+        });
+      }, 3000);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -173,9 +209,14 @@ export default function RSVP({
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-linear-to-r from-rose-500 to-rose-600 text-white py-4 rounded-lg font-bold text-sm md:text-base lg:text-lg hover:from-rose-600 hover:to-rose-700 transition shadow-lg"
+              disabled={submitting}
+              className="w-full bg-linear-to-r from-rose-500 to-rose-600 text-white py-4 rounded-lg font-bold text-sm md:text-base lg:text-lg hover:from-rose-600 hover:to-rose-700 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitted ? "✓ សារត្រូវបានផ្ញើ!" : "ផ្ញើសារជូនពរ"}
+              {submitting
+                ? "កំពុងផ្ញើ..."
+                : submitted
+                  ? "✓ សារត្រូវបានផ្ញើ!"
+                  : "ផ្ញើសារជូនពរ"}
             </button>
 
             {submitted && (

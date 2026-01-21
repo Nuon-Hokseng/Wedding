@@ -3,7 +3,11 @@
 import Image from "next/image";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
-export default function Hero() {
+export default function Hero({
+  guestName = "លោក នួន​ ហុកសេង​ នឹង​ ភរិយា",
+}: {
+  guestName?: string;
+}) {
   const { ref: containerRef, isVisible: containerVisible } = useScrollAnimation(
     { threshold: 0.1 },
   );
@@ -65,7 +69,7 @@ export default function Hero() {
                 សូមគោរពអញ្ជើញឯកឧត្តម/លោកអ្នក ជាទីគោរព
               </p>
               <p className="text-xl md:text-2xl lg:text-3xl font-serif text-rose-600 font-semibold cursor-pointer hover:text-rose-700 transition py-2">
-                លោក នួន​ ហុកសេង​ នឹង​ ភរិយា
+                {guestName}
               </p>
               <p className="text-gray-600 text-xs md:text-sm lg:text-base">
                 ជាអធិបតីក្នុងពិធីមង្គលការរបស់ពួកយើង
