@@ -20,7 +20,10 @@ export default function Hero({ guestName = "" }: { guestName?: string }) {
       className="relative w-full py-6 md:py-8 px-4 md:px-8 overflow-hidden"
     >
       <div className="flex flex-col items-center max-w-3xl mx-auto text-center gap-2">
-        <svg viewBox="0 0 500 120" className="w-full max-w-lg mx-auto absolute top-1">
+        <svg
+          viewBox="0 0 500 120"
+          className="w-full max-w-lg mx-auto absolute top-1"
+        >
           <path id="curve" d="M 50 80 Q 250 20 450 80" fill="transparent" />
 
           <text
@@ -32,7 +35,7 @@ export default function Hero({ guestName = "" }: { guestName?: string }) {
             </textPath>
           </text>
         </svg>
-        <h2 className="xl:mt-20 text-2xl md:text-4xl lg:text-5xl font-bold text-rose-600">
+        <h2 className="xl:mt-20 md:mt-20 mt-20 text-2xl md:text-4xl lg:text-5xl font-bold text-rose-600">
           Phorn <span className="text-amber-500">&</span> Mey
         </h2>
         <br />
