@@ -95,7 +95,9 @@ export default function AdminPage() {
   };
 
   const copyInviteLink = (token: string) => {
-    const url = `${window.location.origin}/invite/${token}`;
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || "https://phorn-mey.vercel.app";
+    const url = `${baseUrl}/invite/${token}`;
     navigator.clipboard.writeText(url);
     setMessage("Invite link copied to clipboard!");
     setTimeout(() => setMessage(""), 3000);
