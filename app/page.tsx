@@ -13,9 +13,20 @@ import { supabase } from "@/lib/supabase";
 
 function HomeContent() {
   const searchParams = useSearchParams();
-  const guestName = searchParams.get("guest") || "";
-  const guestId = searchParams.get("guestId")
-    ? parseInt(searchParams.get("guestId")!)
+
+  // Helper function to get cookie value
+  const getCookie = (name: string) => {
+    if (typeof document === "undefined") return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(";").shift();
+    return null;
+  };
+
+  // Get guest info from cookies instead of URL parameters
+  const guestName = getCookie("guest_name") || "";
+  const guestId = getCookie("guest_id")
+    ? parseInt(getCookie("guest_id")!)
     : undefined;
 
   const [wishes, setWishes] = useState<

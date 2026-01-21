@@ -21,15 +21,32 @@ export async function GET(
       );
     }
 
-    // Create response with redirect
+    // Create response with redirect - no query params exposed
     const response = NextResponse.redirect(new URL("/", request.url));
 
-    // Set cookies with redirect URL params instead
-    const redirectUrl = new URL("/", request.url);
-    redirectUrl.searchParams.set("guest", guest.name);
-    redirectUrl.searchParams.set("guestId", guest.id.toString());
+    // Set secure HTTP-only cookies to store guest info
+    response.cookies.set("guest_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    });
 
-    return NextResponse.redirect(redirectUrl);
+    response.cookies.set("guest_name", guest.name, {
+      httpOnly: false, // Need to read on client
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
+    response.cookies.set("guest_id", guest.id.toString(), {
+      httpOnly: false, // Need to read on client
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
+    return response;
   } catch (error) {
     console.error("Invite API error:", error);
     return NextResponse.redirect(new URL("/?error=unexpected", request.url));
