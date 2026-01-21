@@ -121,7 +121,7 @@ export default function WeddingDetails() {
                   <p className="font-khmer text-gray-800 text-sm md:text-base">
                     នៅវេលាថ្ងៃទី
                   </p>
-                  <p className="text-gray-600 text-xs md:text-sm">
+                  <p className="text-gray-600 text-md md:text-sm xl:text-lg">
                     សៅរ៏, មេសា ២៤, ២០២៦
                   </p>
                 </div>
@@ -132,7 +132,7 @@ export default function WeddingDetails() {
                   <p className="font-khmer text-gray-800 text-sm md:text-base">
                     នៅម៉ោង
                   </p>
-                  <p className="text-gray-600 text-xs md:text-sm">
+                  <p className="text-gray-600 text-md md:text-sm xl:text-lg">
                     ៥:០០​ ល្ងាច
                   </p>
                 </div>
@@ -143,10 +143,22 @@ export default function WeddingDetails() {
                   <p className="font-khmer text-gray-800 text-sm md:text-base">
                     ទីតាំងស្ថិតនៅ
                   </p>
-                  <p className="text-gray-600 text-xs md:text-sm">
-                    Grand Ballroom, Paradise Hotel
+                  <p className="text-gray-600 text-md md:text-sm text xl:text-lg">
+                    ភូមិ: ភូមិក្របៅ ឃុំ: ក្របៅ ស្រុក: ស្រុកកំចាយមារ ខេត្ត: ខេត្តព្រៃវែង
+                    <br />
+                    <b>ក្បែរផ្សារក្របៅ</b>
                   </p>
                 </div>
+              </div>
+              <div className="flex gap-4 p-4 bg-pink-50 rounded-lg border border-pink-200">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d671.9099526779493!2d105.76242130268355!3d11.622650357628588!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2skh!4v1769002630187!5m2!1sen!2skh"
+                  width="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
               </div>
             </div>
           </div>
