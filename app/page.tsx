@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import WeddingDetails from "@/components/WeddingDetails";
@@ -10,13 +11,13 @@ import RSVP from "@/components/RSVP";
 import WishesFeed from "@/components/WishesFeed";
 import { supabase } from "@/lib/supabase";
 
-export default function Home({
-  guestName = "លោក នួន​ ហុកសេង​ នឹង​ ភរិយា",
-  guestId,
-}: {
-  guestName?: string;
-  guestId?: number;
-} = {}) {
+export default function Home() {
+  const searchParams = useSearchParams();
+  const guestName = searchParams.get("guest") || "លោក នួន​ ហុកសេង​ នឹង​ ភរិយា";
+  const guestId = searchParams.get("guestId")
+    ? parseInt(searchParams.get("guestId")!)
+    : undefined;
+
   const [wishes, setWishes] = useState<
     Array<{
       id: string;

@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import HomePage from "@/app/page";
 
 export default async function InvitePage({
   params,
@@ -21,6 +20,6 @@ export default async function InvitePage({
     redirect("/");
   }
 
-  // Pass guest data to the home page
-  return <HomePage guestName={guest.name} guestId={guest.id} />;
+  // Redirect to home with guest data in URL params
+  redirect(`/?guest=${encodeURIComponent(guest.name)}&guestId=${guest.id}`);
 }
