@@ -111,7 +111,7 @@ export default function Home() {
         // begin gentle auto-scroll shortly after reveal
         const autoScrollDelay = setTimeout(startAutoScroll, 750);
         return () => clearTimeout(autoScrollDelay);
-      }, 650);
+      }, 2600); // Wait for envelope fly+spin (1.2s) + flap open (0.6s at 1.2s = ends at 1.8s) + overlay fade (700ms) + small buffer
       return () => clearTimeout(timer);
     }
   }, [overlayFading]);
@@ -152,7 +152,7 @@ export default function Home() {
       <AnimatedBackground />
       {!hideOverlay && (
         <div
-          className={`overflow-hidden fixed inset-0 z-40 flex items-center justify-center px-6 transition-opacity duration-700 ${overlayFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+          className={`overflow-hidden fixed inset-0 z-40 flex items-center justify-center px-6 ${overlayFading ? "transition-opacity duration-700 delay-[1800ms] opacity-0 pointer-events-none" : "opacity-100"}`}
         >
           <div className="mx-auto w-full max-w-lg rounded-3xl bg-white/70 backdrop-blur-xl shadow-2xl border border-white/40 p-8 text-center space-y-6">
             <div
