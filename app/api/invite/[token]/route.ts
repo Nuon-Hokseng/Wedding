@@ -24,22 +24,12 @@ export async function GET(
     // Create response with redirect
     const response = NextResponse.redirect(new URL("/", request.url));
 
-    // Set secure cookies
-    response.cookies.set("guest_name", guest.name, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-    });
+    // Set cookies with redirect URL params instead
+    const redirectUrl = new URL("/", request.url);
+    redirectUrl.searchParams.set("guest", guest.name);
+    redirectUrl.searchParams.set("guestId", guest.id.toString());
 
-    response.cookies.set("guest_id", guest.id.toString(), {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-    });
-
-    return response;
+    return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error("Invite API error:", error);
     return NextResponse.redirect(new URL("/?error=unexpected", request.url));
