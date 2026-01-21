@@ -26,19 +26,44 @@ export default function WishesFeed() {
   useEffect(() => {
     const fetchWishes = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("wishes_feed")
-        .select("*")
-        .order("created_at", { ascending: false });
+      try {
+        console.log("🔄 Fetching wishes from wishes_feed table...");
+        const { data, error } = await supabase
+          .from("wishes_feed")
+          .select("id, name, message, created_at")
+          .order("created_at", { ascending: false });
 
-      if (!error && data) {
-        const formattedWishes = data.map((wish) => ({
-          id: wish.id.toString(),
-          name: wish.name,
-          message: wish.message,
-          timestamp: new Date(wish.created_at).getTime(),
-        }));
-        setDisplayedWishes(formattedWishes);
+        console.log("📊 Raw response:", { data, error });
+
+        if (error) {
+          console.error("❌ Error fetching wishes from Supabase:", {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+          });
+          console.warn(
+            "💡 Tip: Check if RLS is enabled on wishes_feed table. If so, add a public read policy or disable RLS if this is public data.",
+          );
+          setDisplayedWishes([]);
+        } else if (data && data.length > 0) {
+          console.log("✅ Successfully fetched wishes:", data.length);
+          console.log("📝 Wishes data:", data);
+          const formattedWishes = data.map((wish: any) => ({
+            id: wish.id.toString(),
+            name: wish.name || "Anonymous",
+            message: wish.message || "",
+            timestamp: new Date(wish.created_at).getTime(),
+          }));
+          setDisplayedWishes(formattedWishes);
+        } else {
+          console.log("ℹ️ No wishes found in the database");
+          console.log("📊 Data returned:", data);
+          setDisplayedWishes([]);
+        }
+      } catch (err) {
+        console.error("❌ Unexpected error fetching wishes:", err);
+        setDisplayedWishes([]);
       }
       setLoading(false);
     };
@@ -47,18 +72,27 @@ export default function WishesFeed() {
 
     // Subscribe to real-time updates
     const subscription = supabase
-      .channel("wishes_feed")
+      .channel("wishes_feed_channel")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "wishes_feed" },
-        () => {
+        (payload) => {
+          console.log("🔔 Real-time update received:", payload);
           fetchWishes();
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("📡 Subscription status:", status);
+      });
+
+    // Also poll every 5 seconds to catch any updates
+    const interval = setInterval(() => {
+      fetchWishes();
+    }, 5000);
 
     return () => {
       subscription.unsubscribe();
+      clearInterval(interval);
     };
   }, []);
 
@@ -101,7 +135,7 @@ export default function WishesFeed() {
               {displayedWishes.map((wish) => (
                 <div
                   key={wish.id}
-                  className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-md border border-rose-100 hover:shadow-lg hover:border-rose-300 transition-all duration-300 animate-in fade-in slide-in-from-bottom"
+                  className="shrink-0 w-72 bg-white rounded-xl p-6 shadow-md border border-rose-100 hover:shadow-lg hover:border-rose-300 transition-all duration-300 animate-in fade-in slide-in-from-bottom"
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">

@@ -52,7 +52,15 @@ export default function RSVP({
     try {
       // If guestId is provided, save to database
       if (guestId) {
-        const { error } = await supabase.from("wishes_feed").insert([
+        console.log("📤 Inserting wish with data:", {
+          guest_id: guestId,
+          name: guestName,
+          number_of_guests: formData.guests,
+          will_attend: formData.attending,
+          message: formData.wishes,
+        });
+
+        const { data, error } = await supabase.from("wishes_feed").insert([
           {
             guest_id: guestId,
             name: guestName,
@@ -62,12 +70,24 @@ export default function RSVP({
           },
         ]);
 
+        console.log("📨 Insert response:", { data, error });
+
         if (error) {
-          console.error("Error saving wish:", error);
+          console.error("❌ Error saving wish:", {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+          });
           alert("Failed to save your wish. Please try again.");
           setSubmitting(false);
           return;
+        } else {
+          console.log("✅ Wish saved successfully!");
         }
+      } else {
+        console.warn(
+          "⚠️ No guestId provided, wish will not be saved to database",
+        );
       }
 
       // Also call the parent callback for local state
