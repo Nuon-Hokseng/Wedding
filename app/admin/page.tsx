@@ -11,7 +11,38 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  const SESSION_KEY = "admin_session";
+  const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+  const persistSession = () => {
+    const expiresAt = Date.now() + ONE_WEEK_MS;
+    const payload = JSON.stringify({ expiresAt });
+    try {
+      localStorage.setItem(SESSION_KEY, payload);
+    } catch (err) {
+      console.error("Failed to persist admin session", err);
+    }
+  };
+
+  const restoreSession = () => {
+    try {
+      const stored = localStorage.getItem(SESSION_KEY);
+      if (!stored) return false;
+      const parsed = JSON.parse(stored);
+      if (parsed?.expiresAt && parsed.expiresAt > Date.now()) {
+        return true;
+      }
+      localStorage.removeItem(SESSION_KEY);
+    } catch (err) {
+      console.error("Failed to restore admin session", err);
+    }
+    return false;
+  };
+
   useEffect(() => {
+    if (restoreSession()) {
+      setIsAuthenticated(true);
+    }
     if (isAuthenticated) {
       fetchGuests();
     }
@@ -25,6 +56,7 @@ export default function AdminPage() {
     if (password === adminPassword) {
       setIsAuthenticated(true);
       setMessage("");
+      persistSession();
     } else {
       setMessage("Invalid password");
     }

@@ -12,21 +12,9 @@ export const metadata: Metadata = {
   title: "Phorn & Mey Wedding",
   description: "You are invited to celebrate the wedding of Phorn & Mey",
   icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
+    // Use existing logo as favicon for all contexts
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 
