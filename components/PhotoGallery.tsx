@@ -7,19 +7,24 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 export default function PhotoGallery() {
   const { ref: sectionRef, isVisible: sectionVisible } = useScrollAnimation({
     threshold: 0.1,
+    triggerOnce: true,
   });
   const { ref: imageRef, isVisible: imageVisible } = useScrollAnimation({
     threshold: 0.1,
+    triggerOnce: true,
   });
   const { ref: thumbsRef, isVisible: thumbsVisible } = useScrollAnimation({
     threshold: 0.1,
+    triggerOnce: true,
   });
   const { ref: collageRef, isVisible: collageVisible } = useScrollAnimation({
     threshold: 0.1,
+    triggerOnce: true,
   });
   const { ref: collageItemsRef, isVisible: collageItemsVisible } =
     useScrollAnimation({
       threshold: 0.1,
+      triggerOnce: true,
     });
 
   const [selectedIndex, setSelectedIndex] = useState(0);
