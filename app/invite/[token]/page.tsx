@@ -83,6 +83,11 @@ export default async function InvitePage({
     console.log("Success! Redirecting to:", redirectUrl);
     redirect(redirectUrl);
   } catch (err) {
+    // Let Next.js redirects pass through
+    if (err instanceof Error && err.message === "NEXT_REDIRECT") {
+      throw err;
+    }
+    
     console.error("Unexpected error:", err);
     const errorMessage = err instanceof Error ? err.message : String(err);
     return (
