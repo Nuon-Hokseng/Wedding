@@ -6,6 +6,7 @@ export default async function InvitePage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  
+
   // Redirect to API route which handles cookie setting
   redirect(`/api/invite/${token}`);
+}
