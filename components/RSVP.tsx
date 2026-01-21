@@ -39,9 +39,11 @@ export default function RSVP({
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!formData.wishes.trim()) {
       return;
@@ -52,15 +54,7 @@ export default function RSVP({
     try {
       // If guestId is provided, save to database
       if (guestId) {
-        console.log("📤 Inserting wish with data:", {
-          guest_id: guestId,
-          name: guestName,
-          number_of_guests: formData.guests,
-          will_attend: formData.attending,
-          message: formData.wishes,
-        });
-
-        const { data, error } = await supabase.from("wishes_feed").insert([
+        const { error: dbError } = await supabase.from("wishes_feed").insert([
           {
             guest_id: guestId,
             name: guestName,
@@ -70,24 +64,18 @@ export default function RSVP({
           },
         ]);
 
-        console.log("📨 Insert response:", { data, error });
-
-        if (error) {
-          console.error("❌ Error saving wish:", {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-          });
-          alert("Failed to save your wish. Please try again.");
+        if (dbError) {
+          // Check if it's a duplicate key error (unique constraint violation)
+          if (dbError.code === "23505" || dbError.message.includes("unique")) {
+            setError(
+              "អ្នកបានផ្ញើសារជូនពររួចហើយ។ អ្នកមានលទ្ធភាពផ្ញើសារតែមួយដង។ សូមអរគុណ! 💌",
+            );
+          } else {
+            setError("មានបញ្ហាក្នុងការរក្សាទុកសាររបស់អ្នក។ សូមព្យាយាមម្តងទៀត។");
+          }
           setSubmitting(false);
           return;
-        } else {
-          console.log("✅ Wish saved successfully!");
         }
-      } else {
-        console.warn(
-          "⚠️ No guestId provided, wish will not be saved to database",
-        );
       }
 
       // Also call the parent callback for local state
@@ -107,9 +95,8 @@ export default function RSVP({
           wishes: "",
         });
       }, 3000);
-    } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred. Please try again.");
+    } catch (err) {
+      setError("មានកំហុសមិនរំពឹងទុក។ សូមព្យាយាមម្តងទៀត។");
     } finally {
       setSubmitting(false);
     }
@@ -135,6 +122,26 @@ export default function RSVP({
             formVisible ? "scroll-animate-scale" : "scroll-hidden-scale"
           }`}
         >
+          {/* Error Modal */}
+          {error && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl p-8 max-w-sm mx-auto shadow-2xl animate-in fade-in scale-95">
+                <div className="text-center">
+                  <p className="text-5xl mb-4">⚠️</p>
+                  <p className="text-gray-800 font-khmer text-base md:text-lg mb-6 leading-relaxed">
+                    {error}
+                  </p>
+                  <button
+                    onClick={() => setError(null)}
+                    className="bg-rose-500 hover:bg-rose-600 text-white font-medium py-3 px-8 rounded-lg transition"
+                  >
+                    យល់ព្រម
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Number of Guests */}
             <div>

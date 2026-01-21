@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { supabase } from "@/lib/supabase";
 
@@ -18,6 +18,7 @@ export default function WishesFeed() {
   const { ref: wishesRef, isVisible: wishesVisible } = useScrollAnimation({
     threshold: 0.1,
   });
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const [displayedWishes, setDisplayedWishes] = useState<Wish[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,95 +26,71 @@ export default function WishesFeed() {
   // Fetch wishes from Supabase
   useEffect(() => {
     const fetchWishes = async () => {
-      setLoading(true);
       try {
-        console.log("🔄 Fetching wishes from wishes_feed table...");
         const { data, error } = await supabase
           .from("wishes_feed")
           .select("id, name, message, created_at")
           .order("created_at", { ascending: false });
 
-        console.log("📊 Raw response:", { data, error });
-
         if (error) {
-          console.error("❌ Error fetching wishes from Supabase:", {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint,
-          });
-          console.warn(
-            "💡 Tip: Check if RLS is enabled on wishes_feed table. If so, add a public read policy or disable RLS if this is public data.",
-          );
           setDisplayedWishes([]);
-        } else if (data && data.length > 0) {
-          console.log("✅ Successfully fetched wishes:", data.length);
-          console.log("📝 Raw wishes data:", data);
-          const formattedWishes = data.map((wish: any) => {
-            const formatted = {
-              id: wish.id?.toString() || "",
-              name: wish.name || "Anonymous",
-              message: wish.message || "",
-              timestamp: wish.created_at
-                ? new Date(wish.created_at).getTime()
-                : Date.now(),
-            };
-            console.log("🔧 Formatted wish:", formatted);
-            return formatted;
-          });
-          console.log("📋 All formatted wishes:", formattedWishes);
+        } else if (data && Array.isArray(data) && data.length > 0) {
+          const formattedWishes: Wish[] = data.map((wish: any) => ({
+            id: String(wish.id),
+            name: wish.name || "Anonymous",
+            message: wish.message || "",
+            timestamp: wish.created_at
+              ? new Date(wish.created_at).getTime()
+              : Date.now(),
+          }));
           setDisplayedWishes(formattedWishes);
-          console.log(
-            "✨ State updated with wishes, displayedWishes should now have length:",
-            formattedWishes.length,
-          );
         } else {
-          console.log("ℹ️ No wishes found in the database");
-          console.log("📊 Data returned:", data);
           setDisplayedWishes([]);
         }
+        setLoading(false);
       } catch (err) {
-        console.error("❌ Unexpected error fetching wishes:", err);
         setDisplayedWishes([]);
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchWishes();
 
-    // Subscribe to real-time updates
     const subscription = supabase
       .channel("wishes_feed_channel")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "wishes_feed" },
-        (payload) => {
-          console.log("🔔 Real-time update received:", payload);
+        () => {
           fetchWishes();
         },
       )
-      .subscribe((status) => {
-        console.log("📡 Subscription status:", status);
-      });
-
-    // Also poll every 5 seconds to catch any updates
-    const interval = setInterval(() => {
-      fetchWishes();
-    }, 5000);
+      .subscribe();
 
     return () => {
       subscription.unsubscribe();
-      clearInterval(interval);
     };
   }, []);
 
-  // Monitor state changes
+  // Mouse wheel horizontal scroll for desktop
   useEffect(() => {
-    console.log("🎯 displayedWishes state updated:", {
-      count: displayedWishes.length,
-      wishes: displayedWishes,
-    });
-  }, [displayedWishes]);
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only apply horizontal scroll if scrolling vertically with mouse wheel
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        scrollContainer.scrollLeft += e.deltaY;
+      }
+    };
+
+    scrollContainer.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      scrollContainer.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
 
   const formatTime = (timestamp: number) => {
     const now = Date.now();
@@ -129,74 +106,140 @@ export default function WishesFeed() {
     return "just now";
   };
 
-  console.log("🎨 Rendering WishesFeed with state:", {
-    loading,
-    wishCount: displayedWishes.length,
-    showWishes: !loading && displayedWishes.length > 0,
-    displayedWishes,
-  });
-
   return (
     <section
       ref={sectionRef}
-      className="w-full py-20 px-4 md:px-8 bg-linear-to-b from-rose-50/50 via-white/50 to-white/50"
+      className="w-full py-20 px-4 md:px-8 from-rose-50 via-white to-white"
     >
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-lg md:text-2xl lg:text-5xl font-khmer text-center mb-4 text-gray-800">
-          សារជូនពររបស់ភ្ងៀវនឹងបង្ហាញនៅទីនេះ
+        <h2 className="text-lg md:text-2xl lg:text-5xl font-khmer text-center mb-2 text-gray-800">
+          សារជូនពររបស់ភ្ងៀវ
         </h2>
-        <p className="text-center text-sm md:text-base lg:text-lg text-gray-600 mb-12 font-khmer">
-          សេចក្ដីស្រឡាញ់ និងពរ ពីភ្ញៀវជាទីគោរពរបស់យើង
+        <p className="text-center text-sm md:text-base lg:text-lg text-gray-600 mb-16 font-khmer">
+          សេចក្ដីស្រឡាញ់ និងពរ ពីភ្ញៀវដ៏ល្អប្រសើររបស់យើង
         </p>
 
-        {/* Wishes Horizontal Scroll */}
+        {/* Wishes Carousel */}
         {!loading && displayedWishes.length > 0 ? (
-          <div
-            ref={wishesRef}
-            className={`overflow-x-auto pb-4 scroll-transition ${
-              wishesVisible ? "scroll-animate-fade-up" : "scroll-hidden"
-            }`}
-          >
-            <div className="flex gap-6 min-w-min px-2">
-              {displayedWishes.map((wish) => (
-                <div
-                  key={wish.id}
-                  className="shrink-0 w-72 bg-white rounded-xl p-6 shadow-md border border-rose-100 hover:shadow-lg hover:border-rose-300 transition-all duration-300 animate-in fade-in slide-in-from-bottom"
-                >
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-800 text-sm md:text-base lg:text-lg">
-                        {wish.name}
-                      </h3>
-                      <p className="text-xs md:text-sm text-gray-500">
-                        {formatTime(wish.timestamp)}
+          <div className="w-full overflow-visible relative z-10">
+            {/* Scroll Container */}
+            <div
+              ref={scrollContainerRef}
+              className="wishes-scroll relative w-full overflow-x-auto overflow-y-visible z-10"
+              style={{
+                scrollBehavior: "smooth",
+                msOverflowStyle: "auto",
+                scrollbarWidth: "thin",
+              }}
+            >
+              <style>{`
+                .wishes-scroll::-webkit-scrollbar {
+                  height: 10px;
+                }
+                .wishes-scroll::-webkit-scrollbar-track {
+                  background: #f8f0f3;
+                  border-radius: 9999px;
+                }
+                .wishes-scroll::-webkit-scrollbar-thumb {
+                  background: linear-gradient(90deg, #fb7185, #ec4899);
+                  border-radius: 9999px;
+                }
+                .wishes-scroll::-webkit-scrollbar-thumb:hover {
+                  background: linear-gradient(90deg, #f43f5e, #db2777);
+                }
+              `}</style>
+
+              <div className="flex gap-6 pb-10 px-4 md:px-6 min-w-min pt-6 overflow-visible">
+                {displayedWishes.map((wish, index) => (
+                  <div
+                    key={wish.id}
+                    className="shrink-0 w-80 md:w-96 min-h-[320px] group relative z-20"
+                    style={{
+                      animation: `slideIn 0.5s ease-out ${index * 0.1}s forwards`,
+                      opacity: 0,
+                    }}
+                  >
+                    <style>{`
+                      @keyframes slideIn {
+                        from {
+                          opacity: 0;
+                          transform: translateX(20px);
+                        }
+                        to {
+                          opacity: 1;
+                          transform: translateX(0);
+                        }
+                      }
+                    `}</style>
+
+                    <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-rose-100 hover:border-rose-400 hover:shadow-2xl transition-all duration-300 h-full flex flex-col hover:scale-110 origin-center cursor-pointer relative z-30 hover:z-50">
+                      {/* Decorative Quote Mark */}
+                      <div className="text-5xl text-rose-200 mb-2 leading-none">
+                        "
+                      </div>
+
+                      {/* Message - Main Content */}
+                      <p className="text-gray-700 leading-relaxed text-base mb-6 flex-grow line-clamp-6 font-medium">
+                        {wish.message}
                       </p>
+
+                      {/* Divider */}
+                      <div className="w-12 h-1 from-rose-300 to-rose-500 mb-4 rounded-full"></div>
+
+                      {/* Author Info */}
+                      <div className="space-y-1">
+                        <h3 className="font-bold text-gray-900 text-lg">
+                          {wish.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 font-medium">
+                          {formatTime(wish.timestamp)}
+                        </p>
+                      </div>
+
+                      {/* Heart Icon */}
+                      <div className="mt-4 text-rose-400 text-2xl opacity-75 group-hover:opacity-100 transition">
+                        💕
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            </div>
 
-                  {/* Message */}
-                  <p className="text-gray-700 leading-relaxed text-xs md:text-sm line-clamp-4">
-                    {wish.message}
-                  </p>
-                </div>
-              ))}
+            {/* Scroll Hint */}
+            {displayedWishes.length > 2 && (
+              <div className="mt-6 flex justify-center items-center text-gray-500 text-sm font-khmer">
+                <span className="flex items-center gap-2 animate-pulse">
+                  ← សូមអូស →
+                </span>
+              </div>
+            )}
+
+            {/* Wish Counter */}
+            <div className="mt-8 text-center">
+              <p className="text-gray-600 font-khmer">
+                មាន {displayedWishes.length} សារជូនពរ
+              </p>
             </div>
           </div>
         ) : !loading ? (
-          <div className="text-center py-16">
-            <p className="text-5xl mb-4">💌</p>
-            <p className="text-xl text-gray-600 font-khmer">
+          <div className="text-center py-20">
+            <p className="text-6xl mb-4">💌</p>
+            <p className="text-2xl text-gray-700 font-khmer mb-3">
               មិនទាន់មានសារជូនពរទេ...
             </p>
-            <p className="text-gray-500 mt-2 font-khmer">
-              អ្នកអាចជាមនុស្សដំបូងដែលចែករំលែកសារជូនពររបស់អ្នក
-              និងបញ្ជាក់ការចូលរួម!
+            <p className="text-gray-500 font-khmer text-lg">
+              អ្នកអាចជាមនុស្សដំបូងដែលចែករំលែកសារជូនពរដ៏ស្នេហ៏របស់អ្នក
             </p>
           </div>
         ) : (
-          <div className="text-center py-16">
-            <p className="text-gray-600 font-khmer">កំពុងផ្ទុក...</p>
+          <div className="text-center py-20">
+            <div className="inline-block">
+              <p className="text-5xl mb-4 animate-bounce">✨</p>
+              <p className="text-gray-600 font-khmer text-lg">
+                កំពុងផ្ទុកសារជូនពរ...
+              </p>
+            </div>
           </div>
         )}
       </div>
