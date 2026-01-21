@@ -28,7 +28,7 @@ export default function Hero({
         🌸
       </div>
       <div
-        className="absolute top-32 right-20 text-6xl opacity-30 animate-sway"
+        className="absolute top-20 right-10 text-6xl opacity-30 animate-sway"
         style={{ animationDelay: "1s" }}
       >
         💕
