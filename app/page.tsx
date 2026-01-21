@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import WeddingDetails from "@/components/WeddingDetails";
@@ -12,11 +11,28 @@ import WishesFeed from "@/components/WishesFeed";
 import { supabase } from "@/lib/supabase";
 
 function HomeContent() {
-  const searchParams = useSearchParams();
-  const guestName = searchParams.get("guest") || "";
-  const guestId = searchParams.get("guestId")
-    ? parseInt(searchParams.get("guestId")!)
-    : undefined;
+  const [guestName, setGuestName] = useState("");
+  const [guestId, setGuestId] = useState<number | undefined>();
+
+  // Read guest data from cookies on mount
+  useEffect(() => {
+    const getCookieValue = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(";").shift();
+      return null;
+    };
+
+    const nameFromCookie = getCookieValue("guest_name");
+    const idFromCookie = getCookieValue("guest_id");
+
+    if (nameFromCookie) {
+      setGuestName(decodeURIComponent(nameFromCookie));
+    }
+    if (idFromCookie) {
+      setGuestId(parseInt(idFromCookie));
+    }
+  }, []);
 
   const [wishes, setWishes] = useState<
     Array<{
@@ -247,9 +263,5 @@ function HomeContent() {
 }
 
 export default function Home() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-rose-50" />}>
-      <HomeContent />
-    </Suspense>
-  );
+  return <HomeContent />;
 }

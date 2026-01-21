@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { supabase } from "@/lib/supabase";
 
 export default async function InvitePage({
@@ -78,10 +79,23 @@ export default async function InvitePage({
       );
     }
 
-    // Redirect to home with guest data in URL params
-    const redirectUrl = `/?guest=${encodeURIComponent(guest.name)}&guestId=${guest.id}`;
-    console.log("Success! Redirecting to:", redirectUrl);
-    redirect(redirectUrl);
+    // Store guest data in cookie and redirect to home
+    const cookieStore = await cookies();
+    cookieStore.set("guest_name", guest.name, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+    cookieStore.set("guest_id", guest.id.toString(), {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    console.log("Success! Cookie set, redirecting to home");
+    redirect("/");
   } catch (err) {
     // Let Next.js redirects pass through
     if (err instanceof Error && err.message === "NEXT_REDIRECT") {
