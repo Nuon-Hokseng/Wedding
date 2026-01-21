@@ -13,16 +13,16 @@ export default function Header({ coupleNames }: { coupleNames: string }) {
         </div>
         <nav className="hidden md:flex gap-8 text-sm font-medium text-gray-600">
           <a href="#details" className="hover:text-rose-600 transition">
-            Details
+            ព័ត៌មានពីពិធីមង្គលការ
           </a>
           <a href="#gallery" className="hover:text-rose-600 transition">
-            Moments
+            រូបភាព
           </a>
           <a href="#story" className="hover:text-rose-600 transition">
-            Our Story
+            សាច់រឿងរបស់យើង
           </a>
           <a href="#rsvp" className="hover:text-rose-600 transition">
-            RSVP
+            សារជូនពរដល់គូរភរិយា
           </a>
         </nav>
       </div>

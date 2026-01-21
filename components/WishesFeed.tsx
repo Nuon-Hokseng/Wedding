@@ -72,7 +72,7 @@ export default function WishesFeed({ wishes }: { wishes: Wish[] }) {
         {displayedWishes.length > 0 && (
           <div
             ref={statsRef}
-            className={`grid md:grid-cols-3 gap-4 mb-12 transition-all duration-1000 ${
+            className={`grid md:grid-cols-3 gap-4 mb-12 scroll-transition ${
               statsVisible ? "scroll-animate-scale" : "scroll-hidden-scale"
             }`}
           >
@@ -125,7 +125,7 @@ export default function WishesFeed({ wishes }: { wishes: Wish[] }) {
         {filteredWishes.length > 0 ? (
           <div
             ref={wishesRef}
-            className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-1000 ${
+            className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 scroll-transition ${
               wishesVisible ? "scroll-animate-fade-up" : "scroll-hidden"
             }`}
           >

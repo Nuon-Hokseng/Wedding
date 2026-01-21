@@ -66,7 +66,7 @@ export default function RSVP({
     <section
       id="rsvp"
       ref={sectionRef}
-      className="w-full py-20 px-4 md:px-8 bg-gradient-to-b from-white to-rose-50"
+      className="w-full py-20 px-4 md:px-8 bg-gradient-to-b from-white to-rose-50 scroll-mt-24 md:scroll-mt-32"
     >
       <div className="max-w-3xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-gray-800">
@@ -78,7 +78,7 @@ export default function RSVP({
 
         <div
           ref={formRef}
-          className={`bg-white rounded-2xl p-8 md:p-10 shadow-lg border border-rose-200 transition-all duration-1000 ${
+          className={`bg-white rounded-2xl p-8 md:p-10 shadow-lg border border-rose-200 scroll-transition ${
             formVisible ? "scroll-animate-scale" : "scroll-hidden-scale"
           }`}
         >

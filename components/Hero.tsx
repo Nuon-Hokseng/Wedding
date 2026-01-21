@@ -40,7 +40,7 @@ export default function Hero() {
         {/* Left: Invitation Text */}
         <div
           ref={textRef}
-          className={`flex flex-col justify-center space-y-6 transition-all duration-1000 ${
+          className={`flex flex-col justify-center space-y-6 scroll-transition ${
             textVisible ? "scroll-animate-fade-left" : "scroll-hidden-left"
           }`}
         >
@@ -78,12 +78,12 @@ export default function Hero() {
             <div className="border-t-2 border-rose-200 pt-6">
               <p className="text-center text-gray-700 font-serif space-y-2">
                 <span className="block">
-                  Saturday, the twenty-fifth of April
+                  Saturday, 25th of April
                 </span>
                 <span className="block font-bold text-2xl">
-                  Two thousand twenty-six
+                 2026
                 </span>
-                <span className="block">at five o'clock in the evening</span>
+                <span className="block">at 5pm</span>
               </p>
             </div>
           </div>
@@ -92,7 +92,7 @@ export default function Hero() {
         {/* Right: Photo with Effects */}
         <div
           ref={photoRef}
-          className={`relative h-96 md:h-[500px] rounded-2xl overflow-visible transition-all duration-1000 ${
+          className={`relative h-96 md:h-[500px] rounded-2xl overflow-visible scroll-transition ${
             photoVisible ? "scroll-animate-fade-right" : "scroll-hidden-right"
           }`}
         >
@@ -112,7 +112,7 @@ export default function Hero() {
               height={200}
             />
           </div>
-          <div className="absolute -bottom-15 -left-15 text-5xl">
+          <div className="absolute -bottom-15 -left-15 text-5xl z-10">
             <Image
               src="/BL.png"
               alt="couple picture"

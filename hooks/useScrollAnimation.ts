@@ -6,7 +6,8 @@ interface UseScrollAnimationOptions {
 }
 
 export function useScrollAnimation(options: UseScrollAnimationOptions = {}) {
-  const { threshold = 0.1, rootMargin = "0px" } = options;
+  // Slight negative bottom rootMargin triggers exit a bit earlier, giving room for smooth transitions
+  const { threshold = 0.1, rootMargin = "0px 0px -10% 0px" } = options;
   const ref = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 

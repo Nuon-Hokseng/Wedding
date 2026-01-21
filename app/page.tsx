@@ -61,7 +61,7 @@ export default function Home() {
       <AnimatedBackground />
       {!hideOverlay && (
         <div
-          className={`fixed inset-0 z-40 flex items-center justify-center px-6 transition-opacity duration-700 ${overlayFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+          className={`overflow-hidden fixed inset-0 z-40 flex items-center justify-center px-6 transition-opacity duration-700 ${overlayFading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         >
           <div className="mx-auto w-full max-w-lg rounded-3xl bg-white/70 backdrop-blur-xl shadow-2xl border border-white/40 p-8 text-center space-y-6">
             <div

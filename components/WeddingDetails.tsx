@@ -65,7 +65,7 @@ export default function WeddingDetails() {
     <section
       id="details"
       ref={sectionRef}
-      className="w-full py-20 px-4 md:px-8 bg-white"
+      className="w-full py-20 px-4 md:px-8 bg-white scroll-mt-24 md:scroll-mt-32"
     >
       <div className="max-w-7xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-gray-800">
@@ -78,7 +78,7 @@ export default function WeddingDetails() {
         {/* Countdown Timer */}
         <div
           ref={countdownRef}
-          className={`bg-gradient-to-r from-rose-50 to-amber-50 rounded-2xl p-8 md:p-12 mb-16 border border-rose-200 transition-all duration-1000 ${
+          className={`bg-gradient-to-r from-rose-50 to-amber-50 rounded-2xl p-8 md:p-12 mb-16 border border-rose-200 scroll-transition ${
             countdownVisible ? "scroll-animate-scale" : "scroll-hidden-scale"
           }`}
         >
@@ -110,7 +110,7 @@ export default function WeddingDetails() {
         <div className="grid md:grid-cols-2 gap-8">
           <div
             ref={detailsRef}
-            className={`space-y-6 transition-all duration-1000 ${
+            className={`space-y-6 scroll-transition ${
               detailsVisible ? "scroll-animate-fade-left" : "scroll-hidden-left"
             }`}
           >
@@ -145,9 +145,10 @@ export default function WeddingDetails() {
           </div>
 
           {/* Schedule */}
+
           <div
             ref={scheduleRef}
-            className={`space-y-6 transition-all duration-1000 ${
+            className={`space-y-6 scroll-transition ${
               scheduleVisible
                 ? "scroll-animate-fade-right"
                 : "scroll-hidden-right"

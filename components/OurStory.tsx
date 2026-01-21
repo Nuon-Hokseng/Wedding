@@ -100,7 +100,10 @@ export default function OurStory() {
   }, []);
 
   return (
-    <section id="story" className="w-full py-20 px-4 md:px-8 bg-white">
+    <section
+      id="story"
+      className="w-full py-20 px-4 md:px-8 bg-white scroll-mt-24 md:scroll-mt-32"
+    >
       <div className="max-w-7xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-gray-800">
           Our Story
