@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { supabase } from "@/lib/supabase";
 
 interface Wish {
   id: string;
@@ -10,7 +11,7 @@ interface Wish {
   timestamp: number;
 }
 
-export default function WishesFeed({ wishes }: { wishes: Wish[] }) {
+export default function WishesFeed() {
   const { ref: sectionRef, isVisible: sectionVisible } = useScrollAnimation({
     threshold: 0.1,
   });
@@ -19,12 +20,47 @@ export default function WishesFeed({ wishes }: { wishes: Wish[] }) {
   });
 
   const [displayedWishes, setDisplayedWishes] = useState<Wish[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch wishes from Supabase
   useEffect(() => {
-    // Show newest wishes first without mutating the original array
-    const sorted = [...wishes].sort((a, b) => b.timestamp - a.timestamp);
-    setDisplayedWishes(sorted);
-  }, [wishes]);
+    const fetchWishes = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("wishes_feed")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && data) {
+        const formattedWishes = data.map((wish) => ({
+          id: wish.id.toString(),
+          name: wish.name,
+          message: wish.message,
+          timestamp: new Date(wish.created_at).getTime(),
+        }));
+        setDisplayedWishes(formattedWishes);
+      }
+      setLoading(false);
+    };
+
+    fetchWishes();
+
+    // Subscribe to real-time updates
+    const subscription = supabase
+      .channel("wishes_feed")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "wishes_feed" },
+        () => {
+          fetchWishes();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const formatTime = (timestamp: number) => {
     const now = Date.now();
@@ -53,39 +89,41 @@ export default function WishesFeed({ wishes }: { wishes: Wish[] }) {
           សេចក្ដីស្រឡាញ់ និងពរ ពីភ្ញៀវជាទីគោរពរបស់យើង
         </p>
 
-        {/* Wishes Grid */}
-        {displayedWishes.length > 0 ? (
+        {/* Wishes Horizontal Scroll */}
+        {!loading && displayedWishes.length > 0 ? (
           <div
             ref={wishesRef}
-            className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 scroll-transition ${
+            className={`overflow-x-auto pb-4 scroll-transition ${
               wishesVisible ? "scroll-animate-fade-up" : "scroll-hidden"
             }`}
           >
-            {displayedWishes.map((wish) => (
-              <div
-                key={wish.id}
-                className="bg-white rounded-xl p-6 shadow-md border border-rose-100 hover:shadow-lg hover:border-rose-300 transition-all duration-300 animate-in fade-in slide-in-from-bottom"
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-gray-800 text-sm md:text-base lg:text-lg">
-                      {wish.name}
-                    </h3>
-                    <p className="text-xs md:text-sm text-gray-500">
-                      {formatTime(wish.timestamp)}
-                    </p>
+            <div className="flex gap-6 min-w-min px-2">
+              {displayedWishes.map((wish) => (
+                <div
+                  key={wish.id}
+                  className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-md border border-rose-100 hover:shadow-lg hover:border-rose-300 transition-all duration-300 animate-in fade-in slide-in-from-bottom"
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-800 text-sm md:text-base lg:text-lg">
+                        {wish.name}
+                      </h3>
+                      <p className="text-xs md:text-sm text-gray-500">
+                        {formatTime(wish.timestamp)}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Message */}
-                <p className="text-gray-700 leading-relaxed mb-4 text-xs md:text-sm line-clamp-4">
-                  {wish.message}
-                </p>
-              </div>
-            ))}
+                  {/* Message */}
+                  <p className="text-gray-700 leading-relaxed text-xs md:text-sm line-clamp-4">
+                    {wish.message}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-        ) : (
+        ) : !loading ? (
           <div className="text-center py-16">
             <p className="text-5xl mb-4">💌</p>
             <p className="text-xl text-gray-600 font-khmer">
@@ -95,6 +133,10 @@ export default function WishesFeed({ wishes }: { wishes: Wish[] }) {
               អ្នកអាចជាមនុស្សដំបូងដែលចែករំលែកសារជូនពររបស់អ្នក
               និងបញ្ជាក់ការចូលរួម!
             </p>
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <p className="text-gray-600 font-khmer">កំពុងផ្ទុក...</p>
           </div>
         )}
       </div>

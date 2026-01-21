@@ -13,7 +13,7 @@ import { supabase } from "@/lib/supabase";
 
 function HomeContent() {
   const searchParams = useSearchParams();
-  const guestName = searchParams.get("guest") || "លោក នួន​ ហុកសេង​ នឹង​ ភរិយា";
+  const guestName = searchParams.get("guest") || "";
   const guestId = searchParams.get("guestId")
     ? parseInt(searchParams.get("guestId")!)
     : undefined;
@@ -240,7 +240,7 @@ function HomeContent() {
         <PhotoGallery />
         <OurStory />
         <RSVP onWishSubmit={addWish} guestName={guestName} guestId={guestId} />
-        <WishesFeed wishes={wishes} />
+        <WishesFeed />
       </main>
     </>
   );
