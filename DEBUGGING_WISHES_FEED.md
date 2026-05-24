@@ -8,7 +8,7 @@
 
 ## Most Likely Cause: Row Level Security (RLS)
 
-**90% chance this is the issue:** The `wishes_feed` table has RLS (Row Level Security) enabled, which prevents anonymous users from reading the data.
+**90% chance this is the issue:** The `wishes_feed` table has RLS (Row Level Security) enabled, which prevents anonymous users from reading the data.dsadasdasdas
 
 ### How to Verify
 
