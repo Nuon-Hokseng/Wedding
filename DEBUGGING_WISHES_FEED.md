@@ -10,8 +10,7 @@
 
 **90% chance this is the issue:** The `wishes_feed` table has RLS (Row Level Security) enabled, which prevents anonymous users from reading the data.
 
-### How to Verify
-
+tgtgtrgrtgtrgtrgtrgrtg
 1. **Check browser console** for errors (press F12 → Console):
    - Look for messages with emoji indicators: ❌, ✅, ℹ️, 💡
    - These will show exact Supabase errors
